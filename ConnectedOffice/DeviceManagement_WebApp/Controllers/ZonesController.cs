@@ -8,153 +8,79 @@ using Microsoft.EntityFrameworkCore;
 using DeviceManagement_WebApp.Data;
 using DeviceManagement_WebApp.Models;
 using DeviceManagement_WebApp.Repository;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using System.Data;
 
 namespace DeviceManagement_WebApp.Controllers
 {
-    [Authorize]
     public class ZonesController : Controller
-    {    
-        private readonly IZoneRepository _zoneRepository;
-        public ZonesController(IZoneRepository zoneRepository)
+    {
+
+
+        protected readonly new IZoneRepository _zoneRepository;
+        protected readonly ConnectedOfficeContext _context;
+
+      
+        public ZonesController(IZoneRepository zoneRepository, ConnectedOfficeContext context)
         {
             _zoneRepository = zoneRepository;
+            _context = context;
         }
 
-
-        // Retrieves all the Zone records from DB
+        // GET: Zones
         public async Task<IActionResult> Index()
         {
             return View(_zoneRepository.GetAll());
-        }
-
-        // Recieve Details of a Zone record
-        public async Task<IActionResult> Details(Guid id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var zone = _zoneRepository.GetById(id);
-                
-            if (zone == null)
-            {
-                return NotFound();
-            }
-
-            return View(zone);
-        }
-
-        // Adds new Zone record to DB
-        // GET part of Create 
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        //POST part of Create()
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ZoneId,ZoneName,ZoneDescription,DateCreated")] Zone zone)
-        {
-            zone.ZoneId = Guid.NewGuid();
-            _zoneRepository.Add(zone);
-            _zoneRepository.Save();
-
-            return RedirectToAction(nameof(Index));
-        }
-
-        // Edits a Zone record on DB
-        // GET part of Edit()
-        public async Task<IActionResult> Edit(Guid id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var zone = _zoneRepository.GetById(id);
-            if (zone == null)
-            {
-                return NotFound();
-            }
-            return View(zone);
-        }
-
-        // POST part of Edit()
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("ZoneId,ZoneName,ZoneDescription,DateCreated")] Zone zone)
-        {
-            if (id != zone.ZoneId)
-            {
-                return NotFound();
-            }
-
-            try
-            {
-                _zoneRepository.Update(zone);
-                _zoneRepository.Save();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ZoneExists(zone.ZoneId))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            return RedirectToAction(nameof(Index));
 
         }
 
-        // Removes Zone record from DB
-        // GET part of Delete()
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var zone = _zoneRepository.GetById(id); 
-                
-            if (zone == null)
-            {
-                return NotFound();
-            }
-
-            return View(zone);
-        }
-
-        // POST part of Delete()
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
-        {
-            var zone = _zoneRepository.GetById(id);
-            _zoneRepository.Remove(zone);
-            _zoneRepository.Save();
-            return RedirectToAction(nameof(Index));
-        }
-
-        // Checks if Zone record exists
-        private bool ZoneExists(Guid id)
+        //GETBYID : Zones
+        public ViewResult Details(Guid id)
         {
             Zone zone = _zoneRepository.GetById(id);
-
-            if (zone != null)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return View(zone);
         }
+
+
+
+
+        /*/create
+        [HttpGet]
+        public ActionResult Create()
+        {
+            //Zone add = new Zone { ZoneName = zone.ZoneName, ZoneDescription = zone.ZoneDescription };
+            return View();
+        }*/
+
+
+        //[HttpPost]
+        public ActionResult Create(Zone zone)
+        {
+            RedirectToAction("Create");
+            Zone add = new Zone { ZoneName = zone.ZoneName, ZoneDescription = zone.ZoneDescription };
+            //_zoneRepository.Add(zone);
+
+            _zoneRepository.Save();
+           
+
+            
+            //try
+            //{
+                if (ModelState.IsValid)
+                {
+                    _zoneRepository.Add(add);
+                    _zoneRepository.Save();
+                    return RedirectToAction("Index");
+                }
+            //}
+            /*catch (DataException  dex)
+            {
+                //Log the error (uncomment dex variable name after DataException and add a line here to write a log.
+                ModelState.AddModelError(string.Empty, "Unable to save changes. Try again, and if the problem persists contact your system administrator.");
+            }*/
+            return View(zone);
+        }
+
     }
 }
+
