@@ -86,14 +86,14 @@ namespace DeviceManagement_WebApp.Controllers
                 return NotFound();
             }
 
-            var zone = _deviceRepository.GetById(id);
-            if (zone == null)
+            var device = _deviceRepository.GetById(id);
+            if (device == null)
             {
                 return NotFound();
             }
             ViewData["CategoryId"] = new SelectList(_categoryRepository.GetAll(), "CategoryId", "CategoryName");
             ViewData["ZoneId"] = new SelectList(_zoneRepository.GetAll(), "ZoneId", "ZoneName");
-            return View(zone);
+            return View(device);
         }
 
         // POST part of Edit(device)
@@ -136,14 +136,14 @@ namespace DeviceManagement_WebApp.Controllers
                 return NotFound();
             }
 
-            var zone = _deviceRepository.GetById(id);
+            var device = _deviceRepository.GetById(id);
 
-            if (zone == null)
+            if (device == null)
             {
                 return NotFound();
             }
 
-            return View(zone);
+            return View(device);
         }
 
         // POST part of Delete(device)
